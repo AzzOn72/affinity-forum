@@ -1,41 +1,53 @@
 /**
- * Affinity Forum - Premium CSS v2.0
- * Professional Counter-Strike 2 Community Forum Styling
+ * Affinity Forum - Ultra Premium CSS v3.0
+ * Professional Counter-Strike 2 Cheat Community Forum Styling
+ * The most advanced and attractive forum design ever created
  */
 
-/* ===== CSS VARIABLES ===== */
+/* ===== ULTRA PREMIUM CSS VARIABLES ===== */
 :root {
-    /* Primary Colors */
-    --accent-primary: #007bff;
-    --accent-primary-rgb: 0, 123, 255;
-    --accent-secondary: #6c757d;
-    --accent-secondary-rgb: 108, 117, 125;
-    --accent-success: #28a745;
-    --accent-success-rgb: 40, 167, 69;
-    --accent-warning: #ffc107;
-    --accent-warning-rgb: 255, 193, 7;
-    --accent-danger: #dc3545;
-    --accent-danger-rgb: 220, 53, 69;
-    --accent-info: #17a2b8;
-    --accent-info-rgb: 23, 162, 184;
+    /* CS2 Primary Colors */
+    --accent-primary: #ff6b35;
+    --accent-primary-rgb: 255, 107, 53;
+    --accent-secondary: #f7931e;
+    --accent-secondary-rgb: 247, 147, 30;
+    --accent-success: #00ff88;
+    --accent-success-rgb: 0, 255, 136;
+    --accent-warning: #ffaa00;
+    --accent-warning-rgb: 255, 170, 0;
+    --accent-danger: #ff4444;
+    --accent-danger-rgb: 255, 68, 68;
+    --accent-info: #00ddff;
+    --accent-info-rgb: 0, 221, 255;
+    --accent-premium: #ffd700;
+    --accent-premium-rgb: 255, 215, 0;
     
-    /* Theme Colors */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
-    --bg-tertiary: #e9ecef;
-    --text-primary: #212529;
-    --text-secondary: #6c757d;
-    --text-muted: #adb5bd;
+    /* Ultra Premium Theme Colors */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #2a2a2a;
+    --bg-glass: rgba(255, 255, 255, 0.05);
+    --bg-glass-hover: rgba(255, 255, 255, 0.1);
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-muted: #999999;
+    --text-highlight: #ff6b35;
     
     /* Border Colors */
-    --border-primary: #dee2e6;
-    --border-secondary: #ced4da;
-    --border-accent: #007bff;
+    --border-primary: #333333;
+    --border-secondary: #444444;
+    --border-accent: #ff6b35;
+    --border-glow: rgba(255, 107, 53, 0.5);
     
-    /* Shadow Colors */
-    --shadow-light: rgba(0, 0, 0, 0.1);
-    --shadow-medium: rgba(0, 0, 0, 0.15);
-    --shadow-heavy: rgba(0, 0, 0, 0.25);
+    /* Shadow & Glow Effects */
+    --shadow-light: rgba(0, 0, 0, 0.3);
+    --shadow-medium: rgba(0, 0, 0, 0.5);
+    --shadow-heavy: rgba(0, 0, 0, 0.7);
+    --glow-primary: 0 0 20px rgba(255, 107, 53, 0.5);
+    --glow-success: 0 0 20px rgba(0, 255, 136, 0.5);
+    --glow-warning: 0 0 20px rgba(255, 170, 0, 0.5);
+    --glow-danger: 0 0 20px rgba(255, 68, 68, 0.5);
+    --glow-premium: 0 0 30px rgba(255, 215, 0, 0.6);
     
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -43,19 +55,22 @@
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 3rem;
+    --spacing-xxl: 4rem;
     
     /* Border Radius */
-    --radius-sm: 0.25rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 1rem;
-    --radius-xl: 1.5rem;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1.25rem;
+    --radius-xl: 2rem;
+    --radius-full: 50%;
     
-    /* Transitions */
-    --transition-fast: 0.15s ease;
-    --transition-normal: 0.3s ease;
-    --transition-slow: 0.5s ease;
+    /* Transitions & Animations */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     
-    /* Z-Index */
+    /* Z-Index Layers */
     --z-dropdown: 1000;
     --z-sticky: 1020;
     --z-fixed: 1030;
@@ -64,6 +79,14 @@
     --z-popover: 1060;
     --z-tooltip: 1070;
     --z-notification: 1080;
+    --z-particles: 9999;
+    
+    /* Premium Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    --gradient-success: linear-gradient(135deg, var(--accent-success), #00cc66);
+    --gradient-premium: linear-gradient(135deg, var(--accent-premium), #ffed4e);
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    --gradient-hero: linear-gradient(135deg, #0a0a0a, #1a1a1a, #2a2a2a);
 }
 
 /* ===== GLOBAL STYLES ===== */
@@ -74,9 +97,27 @@
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
-    color: var(--text-primary, #212529);
-    background: var(--bg-primary, #ffffff);
-    transition: background-color var(--transition-normal), color var(--transition-normal);
+    color: var(--text-primary);
+    background: var(--gradient-hero);
+    background-attachment: fixed;
+    transition: all var(--transition-normal);
+    overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
 }
 
 /* ===== TYPOGRAPHY ===== */

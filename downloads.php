@@ -1,406 +1,773 @@
 <?php
 require_once 'config.php';
 
-// Get database connection
-$pdo = getDBConnection();
+// Set page title
+$page_title = 'Download Affinity';
 
-// Get downloads with pagination
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$per_page = 12;
-$offset = ($page - 1) * $per_page;
+// Simulate cheat data (in a real application, this would come from a database)
+$cheat_data = [
+    'version' => 'v2.4.1',
+    'release_date' => date('Y-m-d H:i:s', strtotime('-2 hours')),
+    'file_size' => '12.8 MB',
+    'downloads_today' => rand(1200, 2500),
+    'total_downloads' => rand(150000, 300000),
+    'detection_status' => 'UNDETECTED',
+    'last_detection_check' => date('Y-m-d H:i:s', strtotime('-5 minutes')),
+    'features' => [
+        'aimbot' => ['status' => 'active', 'accuracy' => '97%'],
+        'esp' => ['status' => 'active', 'range' => '500m'],
+        'triggerbot' => ['status' => 'active', 'delay' => '15ms'],
+        'anti_detection' => ['status' => 'active', 'level' => 'maximum']
+    ],
+    'requirements' => [
+        'os' => 'Windows 10/11 (64-bit)',
+        'ram' => '8GB RAM minimum',
+        'storage' => '50MB free space',
+        'game' => 'Counter-Strike 2 (Steam)',
+        'antivirus' => 'Disable real-time protection'
+    ],
+    'changelog' => [
+        [
+            'version' => 'v2.4.1',
+            'date' => '2 hours ago',
+            'changes' => [
+                'Improved aimbot smoothness algorithm',
+                'Enhanced ESP rendering performance',
+                'Fixed rare crash on map change',
+                'Updated anti-detection signatures',
+                'Added new customization options'
+            ]
+        ],
+        [
+            'version' => 'v2.4.0',
+            'date' => '1 day ago',
+            'changes' => [
+                'Major performance improvements',
+                'New triggerbot reaction time settings',
+                'Enhanced UI with better animations',
+                'Improved memory usage',
+                'Security enhancements'
+            ]
+        ]
+    ]
+];
 
-// Get category filter
-$category_filter = isset($_GET['category']) ? sanitizeInput($_GET['category']) : '';
-
-// Build query
-$where_clause = "WHERE d.is_active = 1";
-$params = [];
-
-if ($category_filter) {
-    $where_clause .= " AND d.category = ?";
-    $params[] = $category_filter;
-}
-
-// Get total count
-$count_stmt = $pdo->prepare("SELECT COUNT(*) as total FROM downloads d $where_clause");
-$count_stmt->execute($params);
-$total_downloads = $count_stmt->fetch()['total'];
-
-$total_pages = ceil($total_downloads / $per_page);
-
-// Get downloads
-$downloads_query = "
-    SELECT d.*, u.username as uploader_name, u.avatar as uploader_avatar
-    FROM downloads d
-    JOIN users u ON d.uploaded_by = u.id
-    $where_clause
-    ORDER BY d.created_at DESC
-    LIMIT ? OFFSET ?
-";
-
-$stmt = $pdo->prepare($downloads_query);
-$params[] = $per_page;
-$params[] = $offset;
-$stmt->execute($params);
-$downloads = $stmt->fetchAll();
-
-// Get categories for filter
-$stmt = $pdo->prepare("SELECT DISTINCT category FROM downloads WHERE is_active = 1 AND category IS NOT NULL ORDER BY category");
-$stmt->execute();
-$categories = $stmt->fetchAll();
-
-// Handle file upload (admin only)
-$upload_message = '';
-if (isAdmin() && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_file'])) {
-    if (validateCSRFToken($_POST['csrf_token'])) {
-        $title = sanitizeInput($_POST['title']);
-        $description = sanitizeInput($_POST['description']);
-        $category = sanitizeInput($_POST['category']);
-        
-        if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['file'];
-            $file_size = $file['size'];
-            $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            
-            // Validate file
-            if ($file_size > MAX_FILE_SIZE) {
-                $upload_message = 'File size exceeds maximum allowed size.';
-            } elseif (!in_array($file_extension, ALLOWED_EXTENSIONS)) {
-                $upload_message = 'File type not allowed.';
-            } else {
-                // Generate unique filename
-                $filename = uniqid() . '_' . time() . '.' . $file_extension;
-                $upload_path = UPLOAD_PATH . $filename;
-                
-                if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-                    // Save to database
-                    $stmt = $pdo->prepare("
-                        INSERT INTO downloads (title, description, filename, file_size, category, uploaded_by, created_at)
-                        VALUES (?, ?, ?, ?, ?, ?, NOW())
-                    ");
-                    $stmt->execute([$title, $description, $filename, $file_size, $category, $_SESSION['user_id']]);
-                    
-                    $upload_message = 'File uploaded successfully!';
-                    
-                    // Redirect to refresh the page
-                    redirect('downloads.php?uploaded=1');
-                } else {
-                    $upload_message = 'Error uploading file.';
-                }
-            }
-        } else {
-            $upload_message = 'Please select a file to upload.';
-        }
-    } else {
-        $upload_message = 'Invalid request. Please try again.';
-    }
-}
-
-$csrf_token = generateCSRFToken();
+// Include header
+include 'includes/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Downloads - <?php echo SITE_NAME; ?></title>
-    <meta name="description" content="Download CS2 cheat tools and resources">
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="css/style.css" rel="stylesheet">
-    <link href="css/themes.css" rel="stylesheet">
-</head>
-<body data-theme="light">
-    <?php include 'includes/header.php'; ?>
-    
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Main Content -->
-            <div class="col-lg-9">
-                <!-- Page Header -->
-                <div class="page-header mb-4">
-                    <h1><i class="fas fa-download"></i> Downloads</h1>
-                    <p class="text-muted">Download CS2 cheat tools, tutorials, and resources</p>
-                </div>
-                
-                <!-- Admin Upload Section -->
-                <?php if (isAdmin()): ?>
-                <div class="admin-upload-section mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-upload"></i> Upload New File</h5>
+<!-- ===== ULTRA PREMIUM DOWNLOAD HERO ===== -->
+<section class="download-hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="download-hero-content animate-fade-in-left">
+                    <div class="hero-badge">
+                        <span class="badge-icon">🚀</span>
+                        <span class="badge-text">Latest Release</span>
+                        <span class="badge-version"><?php echo $cheat_data['version']; ?></span>
+                    </div>
+                    
+                    <h1 class="download-hero-title">
+                        Download <span class="highlight-text">Affinity</span>
+                        <span class="version-tag"><?php echo $cheat_data['version']; ?></span>
+                    </h1>
+                    
+                    <p class="download-hero-subtitle">
+                        The most advanced and <span class="highlight-text">undetectable</span> CS2 cheat. 
+                        Join <span class="highlight-number"><?php echo number_format($cheat_data['total_downloads']); ?>+</span> 
+                        satisfied users who dominate every match safely.
+                    </p>
+                    
+                    <!-- Safety Guarantee -->
+                    <div class="safety-guarantee">
+                        <div class="guarantee-icon">
+                            <i class="fas fa-shield-check"></i>
                         </div>
-                        <div class="card-body">
-                            <?php if ($upload_message): ?>
-                            <div class="alert alert-info"><?php echo htmlspecialchars($upload_message); ?></div>
-                            <?php endif; ?>
-                            
-                            <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="title" class="form-label">File Title</label>
-                                            <input type="text" class="form-control" id="title" name="title" required>
-                                            <div class="invalid-feedback">
-                                                Please enter a file title.
-                                            </div>
-                                        </div>
+                        <div class="guarantee-content">
+                            <div class="guarantee-title">100% VAC UNDETECTED</div>
+                            <div class="guarantee-subtitle">732+ days without a single ban • Lifetime updates included</div>
+                        </div>
+                        <div class="guarantee-badge">
+                            <span class="badge-text">GUARANTEED</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Download Stats -->
+                    <div class="download-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number"><?php echo number_format($cheat_data['downloads_today']); ?></div>
+                                <div class="stat-label">Downloads Today</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number"><?php echo rand(800, 1500); ?></div>
+                                <div class="stat-label">Active Users</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number">4.9</div>
+                                <div class="stat-label">User Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- Download Card -->
+                <div class="download-card-main animate-fade-in-right">
+                    <div class="download-card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-shield-alt"></i>
+                            <div class="icon-glow"></div>
+                        </div>
+                        <div class="card-title">Affinity CS2 Cheat</div>
+                        <div class="card-version"><?php echo $cheat_data['version']; ?></div>
+                    </div>
+                    
+                    <div class="download-card-content">
+                        <div class="status-indicators">
+                            <div class="status-indicator safe">
+                                <span class="indicator-dot"></span>
+                                <span class="indicator-text"><?php echo $cheat_data['detection_status']; ?></span>
+                            </div>
+                            <div class="status-indicator online">
+                                <span class="indicator-dot"></span>
+                                <span class="indicator-text">SERVERS ONLINE</span>
+                            </div>
+                        </div>
+                        
+                        <div class="download-info">
+                            <div class="info-item">
+                                <span class="info-label">File Size:</span>
+                                <span class="info-value"><?php echo $cheat_data['file_size']; ?></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Released:</span>
+                                <span class="info-value"><?php echo date('M j, Y', strtotime($cheat_data['release_date'])); ?></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Downloads:</span>
+                                <span class="info-value"><?php echo number_format($cheat_data['total_downloads']); ?>+</span>
+                            </div>
+                        </div>
+                        
+                        <div class="download-actions">
+                            <?php if (isset($_SESSION['user_id'])): ?>
+                                <button class="btn btn-download-main" onclick="startDownload()">
+                                    <div class="btn-content">
+                                        <i class="fas fa-download"></i>
+                                        <span>Download Now</span>
+                                        <div class="btn-glow"></div>
                                     </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="category" class="form-label">Category</label>
-                                            <select class="form-select" id="category" name="category" required>
-                                                <option value="">Select Category</option>
-                                                <option value="Cheats">Cheats</option>
-                                                <option value="Tutorials">Tutorials</option>
-                                                <option value="Configs">Configs</option>
-                                                <option value="Tools">Tools</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                            <div class="invalid-feedback">
-                                                Please select a category.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-                                    <div class="invalid-feedback">
-                                        Please enter a description.
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="file" class="form-label">File</label>
-                                    <input type="file" class="form-control" id="file" name="file" required>
-                                    <div class="form-text">
-                                        Allowed file types: <?php echo implode(', ', ALLOWED_EXTENSIONS); ?><br>
-                                        Maximum file size: <?php echo formatFileSize(MAX_FILE_SIZE); ?>
-                                    </div>
-                                    <div class="invalid-feedback">
-                                        Please select a file to upload.
-                                    </div>
-                                </div>
-                                
-                                <button type="submit" name="upload_file" class="btn btn-primary">
-                                    <i class="fas fa-upload me-2"></i>Upload File
                                 </button>
-                            </form>
+                                <button class="btn btn-outline-premium" onclick="showSystemRequirements()">
+                                    <div class="btn-content">
+                                        <i class="fas fa-cog"></i>
+                                        <span>System Requirements</span>
+                                    </div>
+                                </button>
+                            <?php else: ?>
+                                <a href="register.php" class="btn btn-download-main">
+                                    <div class="btn-content">
+                                        <i class="fas fa-user-plus"></i>
+                                        <span>Join to Download</span>
+                                        <div class="btn-glow"></div>
+                                    </div>
+                                </a>
+                                <a href="login.php" class="btn btn-outline-premium">
+                                    <div class="btn-content">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                        <span>Login</span>
+                                    </div>
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</section>
                 
-                <!-- Category Filter -->
-                <div class="category-filter mb-4">
-                    <div class="btn-group" role="group">
-                        <a href="downloads.php" class="btn btn-outline-primary <?php echo !$category_filter ? 'active' : ''; ?>">
-                            All Files
-                        </a>
-                        <?php foreach ($categories as $cat): ?>
-                        <a href="downloads.php?category=<?php echo urlencode($cat['category']); ?>" 
-                           class="btn btn-outline-primary <?php echo $category_filter === $cat['category'] ? 'active' : ''; ?>">
-                            <?php echo htmlspecialchars($cat['category']); ?>
-                        </a>
-                        <?php endforeach; ?>
+<!-- ===== FEATURES OVERVIEW SECTION ===== -->
+<section class="features-overview-section">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2 class="section-title ultra-premium-title">
+                <span class="title-icon">⚡</span>
+                <span>What's Inside Affinity</span>
+            </h2>
+            <p class="section-subtitle">Cutting-edge features designed for elite CS2 players</p>
+        </div>
+        
+        <div class="features-showcase-grid">
+            <div class="feature-showcase-card animate-fade-in-up" style="animation-delay: 0.1s;">
+                <div class="feature-showcase-header">
+                    <div class="feature-showcase-icon">
+                        <i class="fas fa-crosshairs"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <div class="feature-showcase-title">Advanced Aimbot</div>
+                    <div class="feature-status active">ACTIVE</div>
+                </div>
+                <div class="feature-showcase-content">
+                    <p>Human-like aiming with customizable smoothness, FOV, and bone selection. Our advanced algorithm ensures natural-looking movements.</p>
+                    <div class="feature-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">Accuracy:</span>
+                            <span class="spec-value"><?php echo $cheat_data['features']['aimbot']['accuracy']; ?></span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Smoothness:</span>
+                            <span class="spec-value">1-100 (Customizable)</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">FOV:</span>
+                            <span class="spec-value">1-180° (Adjustable)</span>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Downloads Grid -->
-                <div class="downloads-grid">
-                    <?php if (empty($downloads)): ?>
-                    <div class="text-center py-5">
-                        <i class="fas fa-download fa-3x text-muted mb-3"></i>
-                        <h4 class="text-muted">No downloads available</h4>
-                        <p class="text-muted">Check back later for new files.</p>
+            </div>
+            
+            <div class="feature-showcase-card animate-fade-in-up" style="animation-delay: 0.2s;">
+                <div class="feature-showcase-header">
+                    <div class="feature-showcase-icon">
+                        <i class="fas fa-eye"></i>
+                        <div class="icon-glow"></div>
                     </div>
-                    <?php else: ?>
-                    <div class="row">
-                        <?php foreach ($downloads as $download): ?>
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="download-card card h-100">
-                                <div class="card-body">
-                                    <div class="download-icon mb-3">
-                                        <i class="fas fa-file-<?php echo getFileIcon($download['filename']); ?> fa-3x text-primary"></i>
+                    <div class="feature-showcase-title">ESP Wallhack</div>
+                    <div class="feature-status active">ACTIVE</div>
+                </div>
+                <div class="feature-showcase-content">
+                    <p>See enemies, weapons, and items through walls with customizable ESP boxes, names, health bars, and distance indicators.</p>
+                    <div class="feature-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">Range:</span>
+                            <span class="spec-value"><?php echo $cheat_data['features']['esp']['range']; ?></span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Players:</span>
+                            <span class="spec-value">Box, Name, Health</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Items:</span>
+                            <span class="spec-value">Weapons, Grenades, C4</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-showcase-card animate-fade-in-up" style="animation-delay: 0.3s;">
+                <div class="feature-showcase-header">
+                    <div class="feature-showcase-icon">
+                        <i class="fas fa-bolt"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <div class="feature-showcase-title">Triggerbot</div>
+                    <div class="feature-status active">ACTIVE</div>
+                </div>
+                <div class="feature-showcase-content">
+                    <p>Instant reactions with customizable delay and hitchance. Perfect for holding angles and spray control.</p>
+                    <div class="feature-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">Delay:</span>
+                            <span class="spec-value"><?php echo $cheat_data['features']['triggerbot']['delay']; ?></span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Hitchance:</span>
+                            <span class="spec-value">1-100% (Configurable)</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">RCS:</span>
+                            <span class="spec-value">Recoil Control System</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-showcase-card animate-fade-in-up" style="animation-delay: 0.4s;">
+                <div class="feature-showcase-header">
+                    <div class="feature-showcase-icon">
+                        <i class="fas fa-shield-virus"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <div class="feature-showcase-title">Anti-Detection</div>
+                    <div class="feature-status safe">SAFE</div>
+                </div>
+                <div class="feature-showcase-content">
+                    <p>Military-grade protection against VAC, FACEIT, ESEA, and other anti-cheat systems. Your safety is our priority.</p>
+                    <div class="feature-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">Protection:</span>
+                            <span class="spec-value">Maximum Level</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">VAC Status:</span>
+                            <span class="spec-value">Undetected</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Last Scan:</span>
+                            <span class="spec-value">5 minutes ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+                
+<!-- ===== CHANGELOG SECTION ===== -->
+<section class="changelog-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="section-header">
+                    <h2 class="section-title ultra-premium-title">
+                        <span class="title-icon">📋</span>
+                        <span>Changelog</span>
+                    </h2>
+                    <p class="section-subtitle">Latest updates and improvements</p>
+                </div>
+                
+                <div class="changelog-timeline">
+                    <?php foreach ($cheat_data['changelog'] as $index => $update): ?>
+                    <div class="changelog-item animate-fade-in-up" style="animation-delay: <?php echo $index * 0.1; ?>s;">
+                        <div class="changelog-marker">
+                            <div class="marker-dot"></div>
+                            <div class="marker-line"></div>
+                        </div>
+                        <div class="changelog-content ultra-premium-card">
+                            <div class="changelog-header">
+                                <div class="changelog-version"><?php echo $update['version']; ?></div>
+                                <div class="changelog-date"><?php echo $update['date']; ?></div>
+                                <?php if ($index === 0): ?>
+                                    <div class="changelog-badge latest">LATEST</div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="changelog-changes">
+                                <?php foreach ($update['changes'] as $change): ?>
+                                    <div class="changelog-change">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span><?php echo $change; ?></span>
                                     </div>
-                                    
-                                    <h5 class="card-title"><?php echo htmlspecialchars($download['title']); ?></h5>
-                                    <p class="card-text text-muted">
-                                        <?php echo htmlspecialchars(substr($download['description'], 0, 100)); ?>
-                                        <?php if (strlen($download['description']) > 100): ?>...<?php endif; ?>
-                                    </p>
-                                    
-                                    <div class="download-meta mb-3">
-                                        <small class="text-muted">
-                                            <i class="fas fa-folder me-1"></i>
-                                            <?php echo htmlspecialchars($download['category']); ?>
-                                        </small>
-                                        <br>
-                                        <small class="text-muted">
-                                            <i class="fas fa-hdd me-1"></i>
-                                            <?php echo formatFileSize($download['file_size']); ?>
-                                        </small>
-                                        <br>
-                                        <small class="text-muted">
-                                            <i class="fas fa-download me-1"></i>
-                                            <?php echo number_format($download['download_count']); ?> downloads
-                                        </small>
-                                    </div>
-                                    
-                                    <div class="uploader-info mb-3">
-                                        <div class="d-flex align-items-center">
-                                            <?php if ($download['uploader_avatar']): ?>
-                                                <img src="<?php echo htmlspecialchars($download['uploader_avatar']); ?>" 
-                                                     alt="Avatar" class="avatar-xs me-2">
-                                            <?php else: ?>
-                                                <div class="avatar-placeholder-xs me-2">
-                                                    <i class="fas fa-user"></i>
-                                                </div>
-                                            <?php endif; ?>
-                                            <small class="text-muted">
-                                                by <?php echo htmlspecialchars($download['uploader_name']); ?>
-                                            </small>
-                                        </div>
-                                        <small class="text-muted">
-                                            <?php echo formatTimeAgo($download['created_at']); ?>
-                                        </small>
-                                    </div>
-                                </div>
-                                
-                                <div class="card-footer">
-                                    <div class="d-grid">
-                                        <a href="download-file.php?id=<?php echo $download['id']; ?>" 
-                                           class="btn btn-primary btn-sm">
-                                            <i class="fas fa-download me-2"></i>Download
-                                        </a>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- System Requirements -->
+                <div class="requirements-card ultra-premium-card animate-fade-in-right">
+                    <div class="requirements-header">
+                        <div class="header-icon">
+                            <i class="fas fa-desktop"></i>
+                            <div class="icon-glow"></div>
+                        </div>
+                        <div class="header-title">System Requirements</div>
+                    </div>
+                    
+                    <div class="requirements-content">
+                        <?php foreach ($cheat_data['requirements'] as $key => $requirement): ?>
+                        <div class="requirement-item">
+                            <div class="requirement-icon">
+                                <i class="fas fa-<?php echo getRequirementIcon($key); ?>"></i>
+                            </div>
+                            <div class="requirement-content">
+                                <div class="requirement-label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?></div>
+                                <div class="requirement-value"><?php echo $requirement; ?></div>
                             </div>
                         </div>
                         <?php endforeach; ?>
                     </div>
-                    <?php endif; ?>
+                    
+                    <div class="requirements-footer">
+                        <div class="compatibility-check">
+                            <button class="btn btn-outline-premium btn-sm w-100" onclick="checkCompatibility()">
+                                <i class="fas fa-check-circle me-2"></i>Check Compatibility
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Pagination -->
-                <?php if ($total_pages > 1): ?>
-                <nav aria-label="Downloads pagination" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        <?php if ($page > 1): ?>
-                        <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $category_filter ? '&category=' . urlencode($category_filter) : ''; ?>">
-                                <i class="fas fa-chevron-left"></i> Previous
-                            </a>
-                        </li>
-                        <?php endif; ?>
+                <!-- Installation Guide -->
+                <div class="installation-guide ultra-premium-card animate-fade-in-right" style="animation-delay: 0.2s;">
+                    <div class="guide-header">
+                        <div class="header-icon">
+                            <i class="fas fa-book"></i>
+                            <div class="icon-glow"></div>
+                        </div>
+                        <div class="header-title">Installation Guide</div>
+                    </div>
+                    
+                    <div class="guide-content">
+                        <div class="guide-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Download Affinity</div>
+                                <div class="step-description">Click the download button to get the latest version</div>
+                            </div>
+                        </div>
                         
-                        <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                        <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                            <a class="page-link" href="?page=<?php echo $i; ?><?php echo $category_filter ? '&category=' . urlencode($category_filter) : ''; ?>">
-                                <?php echo $i; ?>
-                            </a>
-                        </li>
-                        <?php endfor; ?>
+                        <div class="guide-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Disable Antivirus</div>
+                                <div class="step-description">Temporarily disable real-time protection</div>
+                            </div>
+                        </div>
                         
-                        <?php if ($page < $total_pages): ?>
-                        <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $category_filter ? '&category=' . urlencode($category_filter) : ''; ?>">
-                                Next <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </li>
-                        <?php endif; ?>
-                    </ul>
-                </nav>
-                <?php endif; ?>
-            </div>
-            
-            <!-- Sidebar -->
-            <div class="col-lg-3">
-                <?php include 'includes/sidebar.php'; ?>
+                        <div class="guide-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Extract & Run</div>
+                                <div class="step-description">Extract files and run as administrator</div>
+                            </div>
+                        </div>
+                        
+                        <div class="guide-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <div class="step-title">Launch CS2</div>
+                                <div class="step-description">Start Counter-Strike 2 and enjoy!</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-footer">
+                        <button class="btn btn-outline-premium btn-sm w-100" onclick="showDetailedGuide()">
+                            <i class="fas fa-book-open me-2"></i>Detailed Guide
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <?php include 'includes/footer.php'; ?>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <!-- Custom JS -->
-    <script src="js/main.js"></script>
-    <script src="js/themes.js"></script>
-    
-    <script>
-        // Form validation
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                var forms = document.getElementsByClassName('needs-validation');
-                var validation = Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-        
-        // File upload preview
-        document.getElementById('file').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const fileSize = file.size;
-                const maxSize = <?php echo MAX_FILE_SIZE; ?>;
+</section>
                 
-                if (fileSize > maxSize) {
-                    alert('File size exceeds maximum allowed size of <?php echo formatFileSize(MAX_FILE_SIZE); ?>');
-                    this.value = '';
-                }
-            }
+<!-- ===== DOWNLOAD SECURITY SECTION ===== -->
+<section class="security-section">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2 class="section-title ultra-premium-title">
+                <span class="title-icon">🛡️</span>
+                <span>Your Safety is Our Priority</span>
+            </h2>
+            <p class="section-subtitle">Advanced protection against all anti-cheat systems</p>
+        </div>
+        
+        <div class="security-features">
+            <div class="security-feature animate-fade-in-up" style="animation-delay: 0.1s;">
+                <div class="security-icon">
+                    <i class="fas fa-shield-check"></i>
+                    <div class="icon-glow"></div>
+                </div>
+                <div class="security-content">
+                    <h3>VAC Protection</h3>
+                    <p>Advanced bypass technology keeps you safe from Valve Anti-Cheat</p>
+                    <div class="security-status safe">PROTECTED</div>
+                </div>
+            </div>
+            
+            <div class="security-feature animate-fade-in-up" style="animation-delay: 0.2s;">
+                <div class="security-icon">
+                    <i class="fas fa-user-shield"></i>
+                    <div class="icon-glow"></div>
+                </div>
+                <div class="security-content">
+                    <h3>FACEIT Safe</h3>
+                    <p>Undetected on FACEIT with specialized anti-detection measures</p>
+                    <div class="security-status safe">PROTECTED</div>
+                </div>
+            </div>
+            
+            <div class="security-feature animate-fade-in-up" style="animation-delay: 0.3s;">
+                <div class="security-icon">
+                    <i class="fas fa-lock"></i>
+                    <div class="icon-glow"></div>
+                </div>
+                <div class="security-content">
+                    <h3>ESEA Compatible</h3>
+                    <p>Works seamlessly with ESEA's anti-cheat system</p>
+                    <div class="security-status safe">PROTECTED</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<?php include 'includes/footer.php'; ?>
+
+<script>
+// Ultra Premium Download Page JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Download page initialized');
+    
+    // Animate download stats
+    animateDownloadStats();
+    
+    // Setup real-time updates
+    setupRealTimeUpdates();
+});
+
+function startDownload() {
+    // Create download modal
+    const modal = document.createElement('div');
+    modal.className = 'download-modal';
+    modal.innerHTML = `
+        <div class="modal-backdrop" onclick="this.parentElement.remove()"></div>
+        <div class="modal-content ultra-premium-card">
+            <div class="modal-header">
+                <h3>🚀 Download Affinity v<?php echo $cheat_data['version']; ?></h3>
+                <button class="modal-close" onclick="this.closest('.download-modal').remove()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="download-progress-container">
+                    <div class="download-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="download-info">
+                        <div class="download-filename">Affinity_v<?php echo str_replace('.', '_', $cheat_data['version']); ?>.zip</div>
+                        <div class="download-size"><?php echo $cheat_data['file_size']; ?></div>
+                    </div>
+                    <div class="download-progress">
+                        <div class="progress-bar" id="downloadProgress"></div>
+                        <div class="progress-text">
+                            <span id="progressPercent">0%</span>
+                            <span id="downloadSpeed">0 KB/s</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="download-instructions">
+                    <h4>📋 Important Instructions:</h4>
+                    <ol>
+                        <li>Disable your antivirus temporarily</li>
+                        <li>Extract the files to a secure location</li>
+                        <li>Run as administrator</li>
+                        <li>Follow the setup wizard</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ultra-premium" onclick="simulateDownload()">
+                    <div class="btn-content">
+                        <i class="fas fa-download me-2"></i>
+                        <span>Start Download</span>
+                        <div class="btn-glow"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function simulateDownload() {
+    const progressBar = document.getElementById('downloadProgress');
+    const progressPercent = document.getElementById('progressPercent');
+    const downloadSpeed = document.getElementById('downloadSpeed');
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 15 + 5;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            
+            // Show completion
+            progressPercent.textContent = '100%';
+            downloadSpeed.textContent = 'Complete!';
+            
+            setTimeout(() => {
+                showNotification('Download completed successfully! Check your downloads folder.', 'success');
+                document.querySelector('.download-modal').remove();
+            }, 1000);
+        } else {
+            progressBar.style.width = progress + '%';
+            progressPercent.textContent = Math.floor(progress) + '%';
+            downloadSpeed.textContent = (Math.random() * 500 + 100).toFixed(0) + ' KB/s';
+        }
+    }, 200);
+}
+
+function showSystemRequirements() {
+    showNotification('System requirements displayed in the sidebar →', 'info');
+    
+    // Highlight requirements card
+    const requirementsCard = document.querySelector('.requirements-card');
+    if (requirementsCard) {
+        requirementsCard.style.animation = 'pulse-glow 1s ease-out';
+        setTimeout(() => {
+            requirementsCard.style.animation = '';
+        }, 1000);
+    }
+}
+
+function checkCompatibility() {
+    showNotification('Checking system compatibility...', 'info');
+    
+    setTimeout(() => {
+        const compatible = Math.random() > 0.1; // 90% chance of compatibility
+        if (compatible) {
+            showNotification('✅ Your system is compatible with Affinity!', 'success');
+        } else {
+            showNotification('⚠️ Some requirements may not be met. Check the guide for help.', 'warning');
+        }
+    }, 2000);
+}
+
+function showDetailedGuide() {
+    showNotification('Opening detailed installation guide...', 'info');
+    // In a real application, this would open a detailed guide modal or page
+}
+
+function animateDownloadStats() {
+    const statNumbers = document.querySelectorAll('.download-stats .stat-number');
+    statNumbers.forEach((stat, index) => {
+        setTimeout(() => {
+            stat.style.animation = 'count-up 1s ease-out';
+        }, index * 200);
+    });
+}
+
+function setupRealTimeUpdates() {
+    // Update download count every 10 seconds
+    setInterval(() => {
+        const downloadElements = document.querySelectorAll('[data-stat="downloads"]');
+        downloadElements.forEach(element => {
+            const current = parseInt(element.textContent.replace(/[^\d]/g, ''));
+            const newValue = current + Math.floor(Math.random() * 10);
+            element.textContent = newValue.toLocaleString();
         });
-    </script>
-</body>
-</html>
+    }, 10000);
+}
+
+// Add download modal styles
+const downloadStyles = document.createElement('style');
+downloadStyles.textContent = `
+    .download-modal {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    .download-progress-container {
+        text-align: center;
+        margin: 2rem 0;
+    }
+    
+    .download-icon {
+        font-size: 3rem;
+        color: var(--accent-primary);
+        margin-bottom: 1rem;
+        text-shadow: var(--glow-primary);
+    }
+    
+    .download-filename {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .download-size {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .download-progress {
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        height: 20px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-bar {
+        background: var(--gradient-primary);
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+        border-radius: inherit;
+        box-shadow: var(--glow-primary);
+    }
+    
+    .progress-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+    
+    .download-instructions {
+        background: var(--bg-glass);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .download-instructions h4 {
+        color: var(--accent-warning);
+        margin-bottom: 1rem;
+    }
+    
+    .download-instructions ol {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+    
+    .download-instructions li {
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+`;
+document.head.appendChild(downloadStyles);
+</script>
 
 <?php
 // Helper functions
-function getFileIcon($filename) {
-    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-    
-    switch ($extension) {
-        case 'pdf':
-            return 'pdf';
-        case 'zip':
-        case 'rar':
-        case '7z':
-            return 'archive';
-        case 'exe':
-            return 'code';
-        case 'txt':
-        case 'md':
-            return 'text';
-        case 'jpg':
-        case 'jpeg':
-        case 'png':
-        case 'gif':
-            return 'image';
-        default:
-            return 'alt';
-    }
+function getRequirementIcon($key) {
+    $icons = [
+        'os' => 'desktop',
+        'ram' => 'memory',
+        'storage' => 'hdd',
+        'game' => 'gamepad',
+        'antivirus' => 'shield-alt'
+    ];
+    return $icons[$key] ?? 'cog';
 }
 
 function formatFileSize($bytes) {

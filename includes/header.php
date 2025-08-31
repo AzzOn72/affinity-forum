@@ -38,6 +38,7 @@ if (isset($_SESSION['user_id'])) {
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/themes-ultra-premium.css">
+    <link rel="stylesheet" href="css/ultra-premium-components.css">
     
     <!-- Meta tags -->
     <meta name="description" content="Affinity Forum - Connect, Share, and Grow Together">
@@ -106,69 +107,180 @@ if (isset($_SESSION['user_id'])) {
         }, 2000);
     </script>
     
-    <!-- Test script directly in header -->
-    <script src="js/themes-ultra-premium-test.js"></script>
+    <!-- Ultra Premium Scripts -->
+    <script src="js/themes-ultra-premium.js"></script>
+    <script src="js/ultra-premium-features.js"></script>
+    <script src="js/performance-optimizer.js"></script>
+    <script src="js/fun-facts.js"></script>
 </head>
 <body data-theme="<?php echo isset($_COOKIE['selectedTheme']) ? $_COOKIE['selectedTheme'] : 'light'; ?>" data-device="<?php echo isset($_COOKIE['selectedDevice']) ? $_COOKIE['selectedDevice'] : 'desktop'; ?>">
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-premium">
+    <!-- Ultra Premium Navigation Bar -->
+    <nav class="navbar navbar-expand-lg ultra-premium-navbar">
         <div class="container">
-            <a class="navbar-brand text-gradient fw-bold" href="index.php">
-                <i class="fas fa-users me-2"></i>Affinity Forum
+            <a class="navbar-brand ultra-premium-brand" href="index.php">
+                <div class="brand-icon">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="brand-glow"></div>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">Affinity</span>
+                    <span class="brand-tagline">Elite CS2 Community</span>
+                </div>
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler ultra-premium-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="toggler-line"></span>
+                <span class="toggler-line"></span>
+                <span class="toggler-line"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav me-auto ultra-premium-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.php">
-                            <i class="fas fa-home me-1"></i>Home
+                        <a class="nav-link ultra-premium-nav-link" href="index.php">
+                            <div class="nav-link-content">
+                                <i class="fas fa-home"></i>
+                                <span>Home</span>
+                                <div class="nav-link-glow"></div>
+                            </div>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="members.php">
-                            <i class="fas fa-users me-1"></i>Members
+                        <a class="nav-link ultra-premium-nav-link" href="forum.php">
+                            <div class="nav-link-content">
+                                <i class="fas fa-comments"></i>
+                                <span>Forums</span>
+                                <div class="nav-link-glow"></div>
+                            </div>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="search.php">
-                            <i class="fas fa-search me-1"></i>Search
+                        <a class="nav-link ultra-premium-nav-link" href="downloads.php">
+                            <div class="nav-link-content">
+                                <i class="fas fa-download"></i>
+                                <span>Download</span>
+                                <div class="nav-link-glow"></div>
+                                <div class="nav-badge">NEW</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link ultra-premium-nav-link" href="members.php">
+                            <div class="nav-link-content">
+                                <i class="fas fa-users"></i>
+                                <span>Members</span>
+                                <div class="nav-link-glow"></div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link ultra-premium-nav-link" href="search.php">
+                            <div class="nav-link-content">
+                                <i class="fas fa-search"></i>
+                                <span>Search</span>
+                                <div class="nav-link-glow"></div>
+                            </div>
                         </a>
                     </li>
                 </ul>
                 
-                <div class="navbar-nav ms-auto">
+                <div class="navbar-nav ms-auto ultra-premium-nav-controls">
+                    <!-- Theme Selector -->
                     <div class="nav-item dropdown">
-                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            🎨 Theme
+                        <button class="btn ultra-premium-nav-btn dropdown-toggle" type="button" id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="btn-content">
+                                <i class="fas fa-palette"></i>
+                                <span>Theme</span>
+                                <div class="btn-glow"></div>
+                            </div>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-premium" aria-labelledby="themeDropdown">
-                            <li><button class="dropdown-item" onclick="console.log('Light theme clicked'); switchTheme('light')">☀️ Light</button></li>
-                            <li><button class="dropdown-item" onclick="console.log('Dark theme clicked'); switchTheme('dark')">🌙 Dark</button></li>
-                            <li><button class="dropdown-item" onclick="console.log('CS2 theme clicked'); switchTheme('cs2')">🎮 CS2 Gaming</button></li>
-                            <li><button class="dropdown-item" onclick="console.log('Premium theme clicked'); switchTheme('premium')">💎 Premium</button></li>
+                        <ul class="dropdown-menu ultra-premium-dropdown" aria-labelledby="themeDropdown">
+                            <li><button class="dropdown-item ultra-premium-dropdown-item" onclick="switchTheme('light')">
+                                <i class="fas fa-sun"></i> Light Mode
+                            </button></li>
+                            <li><button class="dropdown-item ultra-premium-dropdown-item" onclick="switchTheme('dark')">
+                                <i class="fas fa-moon"></i> Dark Mode
+                            </button></li>
+                            <li><button class="dropdown-item ultra-premium-dropdown-item" onclick="switchTheme('cs2')">
+                                <i class="fas fa-gamepad"></i> CS2 Gaming
+                            </button></li>
+                            <li><button class="dropdown-item ultra-premium-dropdown-item" onclick="switchTheme('premium')">
+                                <i class="fas fa-crown"></i> Premium Luxury
+                            </button></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><button class="dropdown-item" onclick="console.log('Developer mode clicked'); enableDeveloperMode()">🔧 Developer Mode</button></li>
+                            <li><button class="dropdown-item ultra-premium-dropdown-item" onclick="enableDeveloperMode()">
+                                <i class="fas fa-code"></i> Developer Mode
+                            </button></li>
                         </ul>
                     </div>
                     
-                    <button class="btn btn-outline-light ms-2" onclick="console.log('Device button clicked'); showDeviceOverlay();">
-                        📱 Device
+                    <!-- Device Selector -->
+                    <button class="btn ultra-premium-nav-btn ms-2" onclick="showDeviceOverlay();">
+                        <div class="btn-content">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Device</span>
+                            <div class="btn-glow"></div>
+                        </div>
                     </button>
                     
-                    <button class="btn btn-outline-light ms-2" onclick="console.log('Shortcuts button clicked'); showShortcutsHelp();">
-                        ⌨️ Shortcuts
+                    <!-- Shortcuts Help -->
+                    <button class="btn ultra-premium-nav-btn ms-2" onclick="showShortcutsHelp();">
+                        <div class="btn-content">
+                            <i class="fas fa-keyboard"></i>
+                            <span>Shortcuts</span>
+                            <div class="btn-glow"></div>
+                        </div>
                     </button>
                     
+                    <!-- User Controls -->
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="profile.php" class="btn btn-outline-light ms-2">👤 Profile</a>
-                        <a href="logout.php" class="btn btn-outline-light ms-2">🚪 Logout</a>
+                        <!-- User Menu -->
+                        <div class="nav-item dropdown ms-2">
+                            <button class="btn ultra-premium-nav-btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="btn-content">
+                                    <div class="user-avatar-small">
+                                        <img src="images/default-avatar.svg" alt="Avatar" width="20" height="20">
+                                    </div>
+                                    <span><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></span>
+                                    <div class="btn-glow"></div>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu ultra-premium-dropdown" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item ultra-premium-dropdown-item" href="profile.php">
+                                    <i class="fas fa-user"></i> My Profile
+                                </a></li>
+                                <li><a class="dropdown-item ultra-premium-dropdown-item" href="settings.php">
+                                    <i class="fas fa-cog"></i> Settings
+                                </a></li>
+                                <li><a class="dropdown-item ultra-premium-dropdown-item" href="notifications.php">
+                                    <i class="fas fa-bell"></i> Notifications
+                                    <span class="notification-badge">3</span>
+                                </a></li>
+                                <li><a class="dropdown-item ultra-premium-dropdown-item" href="messages.php">
+                                    <i class="fas fa-envelope"></i> Messages
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item ultra-premium-dropdown-item" href="logout.php">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a></li>
+                            </ul>
+                        </div>
                     <?php else: ?>
-                        <a href="login.php" class="btn btn-outline-light ms-2">🔑 Login</a>
-                        <a href="register.php" class="btn btn-outline-light ms-2">📝 Register</a>
+                        <!-- Guest Controls -->
+                        <a href="login.php" class="btn ultra-premium-nav-btn ms-2">
+                            <div class="btn-content">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>Login</span>
+                                <div class="btn-glow"></div>
+                            </div>
+                        </a>
+                        <a href="register.php" class="btn btn-ultra-premium ms-2">
+                            <div class="btn-content">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Join Now</span>
+                                <div class="btn-glow"></div>
+                            </div>
+                        </a>
                     <?php endif; ?>
                 </div>
             </div>

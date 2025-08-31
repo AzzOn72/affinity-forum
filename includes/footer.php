@@ -2,124 +2,198 @@
         </div> <!-- End of container-fluid -->
     </main>
 
-<!-- Footer -->
-<footer class="footer-premium mt-5 py-5">
+<!-- ===== ULTRA PREMIUM FOOTER ===== -->
+<footer class="ultra-premium-footer">
+    <div class="footer-background">
+        <div class="footer-particles"></div>
+        <div class="footer-waves">
+            <div class="wave wave-1"></div>
+            <div class="wave wave-2"></div>
+        </div>
+    </div>
+    
     <div class="container">
-        <div class="row">
-            <div class="col-lg-4 mb-4">
-                <h5 class="text-gradient mb-3">
-                    <i class="fas fa-users me-2"></i>Affinity Forum
-                </h5>
-                <p class="text-muted">
-                    Connect, share, and grow together in our vibrant community. 
-                    Join thousands of members discussing everything from technology to lifestyle.
-                </p>
-                <div class="social-links">
-                    <a href="#" class="social-link me-3" title="Facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" class="social-link me-3" title="Twitter">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" class="social-link me-3" title="Discord">
-                        <i class="fab fa-discord"></i>
-                    </a>
-                    <a href="#" class="social-link" title="GitHub">
-                        <i class="fab fa-github"></i>
-                    </a>
+        <!-- Main Footer Content -->
+        <div class="footer-main">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="footer-brand">
+                        <div class="brand-logo">
+                            <div class="logo-icon">
+                                <i class="fas fa-shield-alt"></i>
+                                <div class="logo-glow"></div>
+                            </div>
+                            <div class="brand-info">
+                                <h4 class="brand-name">Affinity</h4>
+                                <p class="brand-tagline">Elite CS2 Community</p>
+                            </div>
+                        </div>
+                        
+                        <p class="footer-description">
+                            The most advanced and undetectable Counter-Strike 2 cheat community. 
+                            Join thousands of elite players and dominate every match with confidence.
+                        </p>
+                        
+                        <div class="footer-stats">
+                            <div class="footer-stat">
+                                <div class="stat-number" id="footerMembers"><?php echo rand(15000, 25000); ?>+</div>
+                                <div class="stat-label">Members</div>
+                            </div>
+                            <div class="footer-stat">
+                                <div class="stat-number">732+</div>
+                                <div class="stat-label">Days Undetected</div>
+                            </div>
+                            <div class="footer-stat">
+                                <div class="stat-number">99.7%</div>
+                                <div class="stat-label">Satisfaction</div>
+                            </div>
+                        </div>
+                        
+                        <div class="social-links">
+                            <a href="#" class="social-link" title="Discord Server">
+                                <i class="fab fa-discord"></i>
+                                <div class="social-glow"></div>
+                            </a>
+                            <a href="#" class="social-link" title="Telegram Group">
+                                <i class="fab fa-telegram"></i>
+                                <div class="social-glow"></div>
+                            </a>
+                            <a href="#" class="social-link" title="YouTube Channel">
+                                <i class="fab fa-youtube"></i>
+                                <div class="social-glow"></div>
+                            </a>
+                            <a href="#" class="social-link" title="GitHub Repository">
+                                <i class="fab fa-github"></i>
+                                <div class="social-glow"></div>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="col-lg-2 col-md-6 mb-4">
-                <h6 class="fw-bold mb-3">Quick Links</h6>
-                <ul class="list-unstyled">
-                    <li class="mb-2">
-                        <a href="index.php" class="footer-link">
-                            <i class="fas fa-home me-2"></i>Home
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="members.php" class="footer-link">
-                            <i class="fas fa-users me-2"></i>Members
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="search.php" class="footer-link">
-                            <i class="fas fa-search me-2"></i>Search
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="about.php" class="footer-link">
-                            <i class="fas fa-info-circle me-2"></i>About
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            
-            <div class="col-lg-2 col-md-6 mb-4">
-                <h6 class="fw-bold mb-3">Community</h6>
-                <ul class="list-unstyled">
-                    <li class="mb-2">
-                        <a href="guidelines.php" class="footer-link">
-                            <i class="fas fa-book me-2"></i>Guidelines
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="support.php" class="footer-link">
-                            <i class="fas fa-life-ring me-2"></i>Support
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="contact.php" class="footer-link">
-                            <i class="fas fa-envelope me-2"></i>Contact
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="privacy.php" class="footer-link">
-                            <i class="fas fa-shield-alt me-2"></i>Privacy
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            
-            <div class="col-lg-4 mb-4">
-                <h6 class="fw-bold mb-3">Newsletter</h6>
-                <p class="text-muted mb-3">
-                    Stay updated with the latest community news and announcements.
-                </p>
-                <div class="newsletter-form">
-                    <div class="input-group">
-                        <input type="email" class="form-control form-control-premium" placeholder="Enter your email">
-                        <button class="btn btn-ultra-premium" type="button">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h6 class="footer-section-title">
+                            <i class="fas fa-download me-2"></i>Downloads
+                        </h6>
+                        <ul class="footer-links">
+                            <li><a href="downloads.php" class="footer-link">
+                                <i class="fas fa-shield-alt me-2"></i>Affinity Cheat
+                            </a></li>
+                            <li><a href="#" class="footer-link">
+                                <i class="fas fa-cog me-2"></i>Config Generator
+                            </a></li>
+                            <li><a href="#" class="footer-link">
+                                <i class="fas fa-book me-2"></i>User Manual
+                            </a></li>
+                            <li><a href="#" class="footer-link">
+                                <i class="fas fa-video me-2"></i>Video Tutorials
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h6 class="footer-section-title">
+                            <i class="fas fa-comments me-2"></i>Community
+                        </h6>
+                        <ul class="footer-links">
+                            <li><a href="forum.php" class="footer-link">
+                                <i class="fas fa-comments me-2"></i>Forums
+                            </a></li>
+                            <li><a href="members.php" class="footer-link">
+                                <i class="fas fa-users me-2"></i>Members
+                            </a></li>
+                            <li><a href="#" class="footer-link">
+                                <i class="fas fa-trophy me-2"></i>Leaderboard
+                            </a></li>
+                            <li><a href="#" class="footer-link">
+                                <i class="fas fa-calendar me-2"></i>Events
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="footer-section">
+                        <h6 class="footer-section-title">
+                            <i class="fas fa-bell me-2"></i>Stay Updated
+                        </h6>
+                        <p class="footer-description">
+                            Get notified about cheat updates, new features, and community events.
+                        </p>
+                        
+                        <div class="newsletter-form">
+                            <div class="input-group">
+                                <input type="email" class="form-control ultra-premium-input" placeholder="Enter your email">
+                                <button class="btn btn-newsletter" type="button">
+                                    <i class="fas fa-rocket"></i>
+                                    <span>Join Elite</span>
+                                    <div class="btn-glow"></div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="footer-features">
+                            <div class="feature-item">
+                                <i class="fas fa-shield-check"></i>
+                                <span>100% VAC Safe</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-bolt"></i>
+                                <span>Instant Updates</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-headset"></i>
+                                <span>24/7 Support</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <hr class="my-4">
-        
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <p class="mb-0 text-muted">
-                    &copy; <?php echo date('Y'); ?> Affinity Forum. All rights reserved.
-                </p>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <div class="footer-actions">
-                    <button class="btn btn-sm btn-outline-secondary me-2" onclick="switchTheme('light')">
-                        <i class="fas fa-sun"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary me-2" onclick="switchTheme('dark')">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary me-2" onclick="switchTheme('cs2')">
-                        <i class="fas fa-gamepad"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="switchTheme('premium')">
-                        <i class="fas fa-gem"></i>
-                    </button>
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="footer-copyright">
+                        <p class="mb-0">
+                            &copy; <?php echo date('Y'); ?> <strong>Affinity</strong> - Elite CS2 Community. All rights reserved.
+                        </p>
+                        <p class="footer-disclaimer">
+                            Educational purposes only. Use responsibly and at your own risk.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="footer-controls">
+                        <div class="theme-switcher">
+                            <span class="switcher-label">Theme:</span>
+                            <div class="theme-buttons">
+                                <button class="theme-btn" onclick="switchTheme('light')" title="Light Mode">
+                                    <i class="fas fa-sun"></i>
+                                </button>
+                                <button class="theme-btn" onclick="switchTheme('dark')" title="Dark Mode">
+                                    <i class="fas fa-moon"></i>
+                                </button>
+                                <button class="theme-btn" onclick="switchTheme('cs2')" title="CS2 Gaming">
+                                    <i class="fas fa-gamepad"></i>
+                                </button>
+                                <button class="theme-btn" onclick="switchTheme('premium')" title="Premium Luxury">
+                                    <i class="fas fa-crown"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="footer-info">
+                            <span class="version-info">v3.0 Ultra Premium</span>
+                            <span class="status-info">
+                                <span class="status-dot online"></span>
+                                All Systems Online
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
