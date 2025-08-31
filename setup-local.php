@@ -1,13 +1,14 @@
 <?php
 /**
- * Setup Sample Data for Affinity Forum
- * Creates comprehensive sample data to make the forum functional and attractive
+ * Local Setup Script for Affinity Forum
+ * Creates database, tables, and sample data for local development
  */
 
-require_once 'config.php';
+// Use local config
+require_once 'config-local.php';
 
 echo "<!DOCTYPE html>";
-echo "<html><head><title>Setup Sample Data</title>";
+echo "<html><head><title>Local Setup - Affinity Forum</title>";
 echo "<style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
     .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -18,42 +19,126 @@ echo "<style>
 </style></head><body>";
 
 echo "<div class='container'>";
-echo "<h1>🚀 Setting Up Sample Data for Affinity Forum</h1>";
+echo "<h1>🚀 Local Setup for Affinity Forum</h1>";
 
 try {
-    $pdo = getDBConnection();
-    echo "<p class='success'>✅ Database connected successfully</p>";
-    
-    // Step 1: Create sample categories
+    // Step 1: Create database if it doesn't exist
     echo "<div class='step'>";
-    echo "<h3>Step 1: Creating Forum Categories</h3>";
+    echo "<h3>Step 1: Creating Database</h3>";
     
+    $pdo = new PDO("mysql:host=" . DB_HOST . ";charset=" . DB_CHARSET, DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    $pdo->exec("CREATE DATABASE IF NOT EXISTS " . DB_NAME . " CHARACTER SET " . DB_CHARSET . " COLLATE " . DB_COLLATE);
+    echo "<p class='success'>✅ Database 'affinity_forum' created/verified</p>";
+    
+    // Select the database
+    $pdo->exec("USE " . DB_NAME);
+    echo "<p class='success'>✅ Database selected</p>";
+    echo "</div>";
+    
+    // Step 2: Create tables
+    echo "<div class='step'>";
+    echo "<h3>Step 2: Creating Tables</h3>";
+    
+    // Users table
+    $sql = "CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(25) UNIQUE NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        rank ENUM('user', 'moderator', 'admin') DEFAULT 'user',
+        avatar VARCHAR(255),
+        bio TEXT,
+        reputation INT UNSIGNED DEFAULT 0,
+        level INT UNSIGNED DEFAULT 1,
+        experience INT UNSIGNED DEFAULT 0,
+        post_count INT UNSIGNED DEFAULT 0,
+        thread_count INT UNSIGNED DEFAULT 0,
+        like_count INT UNSIGNED DEFAULT 0,
+        is_active BOOLEAN DEFAULT 1,
+        is_premium BOOLEAN DEFAULT 0,
+        theme VARCHAR(20) DEFAULT 'light',
+        last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )";
+    $pdo->exec($sql);
+    echo "<p class='success'>✅ Users table created/verified</p>";
+    
+    // Categories table
+    $sql = "CREATE TABLE IF NOT EXISTS categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        sort_order INT DEFAULT 0,
+        is_active BOOLEAN DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )";
+    $pdo->exec($sql);
+    echo "<p class='success'>✅ Categories table created/verified</p>";
+    
+    // Subforums table
+    $sql = "CREATE TABLE IF NOT EXISTS subforums (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        category_id INT NOT NULL,
+        sort_order INT DEFAULT 0,
+        is_active BOOLEAN DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (category_id) REFERENCES categories(id)
+    )";
+    $pdo->exec($sql);
+    echo "<p class='success'>✅ Subforums table created/verified</p>";
+    
+    // Threads table
+    $sql = "CREATE TABLE IF NOT EXISTS threads (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        user_id INT NOT NULL,
+        subforum_id INT NOT NULL,
+        views INT UNSIGNED DEFAULT 0,
+        replies INT UNSIGNED DEFAULT 0,
+        is_active BOOLEAN DEFAULT 1,
+        is_pinned BOOLEAN DEFAULT 0,
+        is_locked BOOLEAN DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (subforum_id) REFERENCES subforums(id)
+    )";
+    $pdo->exec($sql);
+    echo "<p class='success'>✅ Threads table created/verified</p>";
+    
+    // Posts table
+    $sql = "CREATE TABLE IF NOT EXISTS posts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        content TEXT NOT NULL,
+        user_id INT NOT NULL,
+        thread_id INT NOT NULL,
+        is_active BOOLEAN DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (thread_id) REFERENCES threads(id)
+    )";
+    $pdo->exec($sql);
+    echo "<p class='success'>✅ Posts table created/verified</p>";
+    
+    echo "</div>";
+    
+    // Step 3: Create sample data
+    echo "<div class='step'>";
+    echo "<h3>Step 3: Creating Sample Data</h3>";
+    
+    // Sample categories
     $categories = [
-        [
-            'name' => 'General Discussion',
-            'description' => 'General topics and casual conversations about anything and everything',
-            'sort_order' => 1
-        ],
-        [
-            'name' => 'Gaming & Entertainment',
-            'description' => 'Video games, movies, TV shows, and all forms of entertainment',
-            'sort_order' => 2
-        ],
-        [
-            'name' => 'Technology & Innovation',
-            'description' => 'Latest tech news, programming, gadgets, and innovation discussions',
-            'sort_order' => 3
-        ],
-        [
-            'name' => 'Community & Events',
-            'description' => 'Community events, meetups, and social gatherings',
-            'sort_order' => 4
-        ],
-        [
-            'name' => 'Help & Support',
-            'description' => 'Get help with technical issues, questions, and support requests',
-            'sort_order' => 5
-        ]
+        ['name' => 'General Discussion', 'description' => 'General topics and casual conversations about anything and everything', 'sort_order' => 1],
+        ['name' => 'Gaming & Entertainment', 'description' => 'Video games, movies, TV shows, and all forms of entertainment', 'sort_order' => 2],
+        ['name' => 'Technology & Innovation', 'description' => 'Latest tech news, programming, gadgets, and innovation discussions', 'sort_order' => 3],
+        ['name' => 'Community & Events', 'description' => 'Community events, meetups, and social gatherings', 'sort_order' => 4],
+        ['name' => 'Help & Support', 'description' => 'Get help with technical issues, questions, and support requests', 'sort_order' => 5]
     ];
     
     foreach ($categories as $category) {
@@ -62,12 +147,7 @@ try {
         echo "<p class='success'>✅ Created category: {$category['name']}</p>";
     }
     
-    echo "</div>";
-    
-    // Step 2: Create sample subforums
-    echo "<div class='step'>";
-    echo "<h3>Step 2: Creating Subforums</h3>";
-    
+    // Sample subforums
     $subforums = [
         ['name' => 'Introductions', 'description' => 'Introduce yourself to the community', 'category_id' => 1],
         ['name' => 'Random Chat', 'description' => 'Random conversations and fun topics', 'category_id' => 1],
@@ -86,12 +166,7 @@ try {
         echo "<p class='success'>✅ Created subforum: {$subforum['name']}</p>";
     }
     
-    echo "</div>";
-    
-    // Step 3: Create sample users
-    echo "<div class='step'>";
-    echo "<h3>Step 3: Creating Sample Users</h3>";
-    
+    // Sample users
     $users = [
         [
             'username' => 'Admin',
@@ -146,12 +221,7 @@ try {
         echo "<p class='success'>✅ Created user: {$user['username']} ({$user['rank']})</p>";
     }
     
-    echo "</div>";
-    
-    // Step 4: Create sample threads
-    echo "<div class='step'>";
-    echo "<h3>Step 4: Creating Sample Threads</h3>";
-    
+    // Sample threads
     $threads = [
         [
             'title' => 'Welcome to Affinity Forum! 🎉',
@@ -201,12 +271,7 @@ try {
         echo "<p class='success'>✅ Created thread: {$thread['title']}</p>";
     }
     
-    echo "</div>";
-    
-    // Step 5: Create sample posts
-    echo "<div class='step'>";
-    echo "<h3>Step 5: Creating Sample Posts</h3>";
-    
+    // Sample posts
     $posts = [
         [
             'content' => "Great to be here! I'm excited to meet everyone and contribute to the community.",
@@ -243,9 +308,9 @@ try {
     
     echo "</div>";
     
-    // Step 6: Update statistics
+    // Step 4: Update statistics
     echo "<div class='step'>";
-    echo "<h3>Step 6: Updating Forum Statistics</h3>";
+    echo "<h3>Step 4: Updating Forum Statistics</h3>";
     
     // Update user post counts
     $stmt = $pdo->prepare("UPDATE users SET post_count = (SELECT COUNT(*) FROM posts WHERE user_id = users.id)");
@@ -265,8 +330,8 @@ try {
     echo "</div>";
     
     echo "<div class='step'>";
-    echo "<h3>🎉 Setup Complete!</h3>";
-    echo "<p class='success'>Your forum now has:</p>";
+    echo "<h3>🎉 Local Setup Complete!</h3>";
+    echo "<p class='success'>Your local forum now has:</p>";
     echo "<ul>";
     echo "<li>5 forum categories</li>";
     echo "<li>9 subforums</li>";
@@ -280,6 +345,7 @@ try {
     echo "<li><strong>Moderator:</strong> mod@affinity.com / mod123</li>";
     echo "<li><strong>User:</strong> gamer@affinity.com / gamer123</li>";
     echo "</ul>";
+    echo "<p><strong>Important:</strong> Update your header.php to use 'config-local.php' instead of 'config.php' for local development.</p>";
     echo "<p><a href='index.php' class='btn btn-primary'>Go to Forum</a></p>";
     echo "</div>";
     
