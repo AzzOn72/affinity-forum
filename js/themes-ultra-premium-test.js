@@ -261,6 +261,7 @@ class UltraPremiumThemeManager {
         try {
             // Theme switching with better event delegation
             document.addEventListener('click', (e) => {
+                if (!e || !e.target || typeof e.target.closest !== 'function') return;
                 const themeButton = e.target.closest('[data-theme]');
                 if (themeButton) {
                     e.preventDefault();
@@ -271,6 +272,7 @@ class UltraPremiumThemeManager {
 
             // Device selection with better event delegation
             document.addEventListener('click', (e) => {
+                if (!e || !e.target || typeof e.target.closest !== 'function') return;
                 const deviceOption = e.target.closest('.device-option');
                 if (deviceOption) {
                     e.preventDefault();
@@ -872,6 +874,19 @@ class UltraPremiumThemeManager {
         return icons[type] || icons.info;
     }
 
+    // Get random theme color
+    getRandomThemeColor() {
+        const colors = [
+            '#007bff',
+            '#6c757d',
+            '#28a745',
+            '#ffc107',
+            '#dc3545',
+            '#17a2b8'
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
     // Utility methods
     getCurrentTheme() {
         return this.currentTheme;
@@ -947,6 +962,46 @@ class UltraPremiumThemeManager {
     toggleAudio() {
         this.features.audio = !this.features.audio;
         localStorage.setItem('audio', this.features.audio);
+    }
+
+    // Device-specific optimization
+    optimizeForDevice(device) {
+        try {
+            switch (device) {
+                case 'mobile':
+                    if (this.particleSystem) {
+                        this.particleSystem.particleCount = 15;
+                        this.particleSystem.maxParticles = 30;
+                    }
+                    this.features.animations = false;
+                    this.features.particles = false;
+                    localStorage.setItem('animations', 'false');
+                    localStorage.setItem('motion', 'false');
+                    break;
+                case 'tablet':
+                    if (this.particleSystem) {
+                        this.particleSystem.particleCount = 30;
+                        this.particleSystem.maxParticles = 60;
+                    }
+                    this.features.animations = true;
+                    this.features.particles = true;
+                    break;
+                case 'desktop':
+                default:
+                    if (this.particleSystem) {
+                        this.particleSystem.particleCount = 50;
+                        this.particleSystem.maxParticles = 100;
+                    }
+                    this.features.animations = true;
+                    this.features.particles = true;
+                    break;
+            }
+            
+            console.log(`📱 Optimized for ${device} device`);
+        } catch (error) {
+            console.warn('⚠️ Failed to optimize for device:', error);
+        }
+    }
         
         if (this.features.audio) {
             this.setupAudioContext();
