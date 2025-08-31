@@ -19,11 +19,18 @@ A comprehensive, modern forum system designed specifically for the Counter-Strik
 - **Like System**: User reactions and reputation building
 
 ### Advanced Features
-- **Theme System**: Dark, Light, and CS2-specific themes with live switching
-- **Notifications**: Real-time notifications for replies, mentions, and likes
-- **Private Messaging**: Secure user-to-user communication
-- **File Downloads**: Admin-only file uploads with categorization
-- **Mobile Responsive**: Optimized for all devices and screen sizes
+- **🎨 Advanced Theme System v3.0**: 4 built-in themes + custom theme creation with live preview
+- **✨ Interactive Particle Effects**: 6 different particle types with physics and mouse interaction
+- **🎵 Enhanced Audio System**: Multiple sound effects, volume control, and audio visualization
+- **🧠 AI-Powered Smart Features**: Time-based suggestions and automatic optimization
+- **♿ Comprehensive Accessibility**: Voice control, color blind support, and enhanced navigation
+- **📊 Real-Time Performance Monitoring**: FPS tracking, memory usage, and automatic optimization
+- **🎮 Gaming Mode**: Optimized settings for gaming with CS2 theme and enhanced effects
+- **💾 Advanced Settings Management**: Export/import, auto-save, and performance reports
+- **📱 Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **🔊 Notifications**: Real-time notifications for replies, mentions, and likes
+- **💬 Private Messaging**: Secure user-to-user communication
+- **📁 File Downloads**: Admin-only file uploads with categorization
 
 ### Security Features
 - **CSRF Protection**: Cross-site request forgery prevention
@@ -31,6 +38,33 @@ A comprehensive, modern forum system designed specifically for the Counter-Strik
 - **XSS Protection**: Output sanitization and content security headers
 - **Rate Limiting**: Login attempt throttling and IP blocking
 - **Session Security**: Secure session management and timeout handling
+
+## 🎨 Advanced Theme System v3.0
+
+### ✨ What's New
+- **6 Particle Effects**: Standard, Fireworks, Snow, Rain, Stars, and Bubbles with physics simulation
+- **Enhanced Audio**: Multiple sound effects with volume control and real-time audio visualization
+- **AI-Powered Features**: Smart theme suggestions based on time of day and usage patterns
+- **Voice Control**: Control themes and settings with voice commands (Chrome/Edge)
+- **Custom Theme Creator**: Live color picker with instant preview and sharing
+- **Performance Dashboard**: Real-time FPS, memory usage, and optimization tools
+- **Advanced Accessibility**: Color blind support, enhanced screen reader compatibility
+- **Interactive Effects**: Click anywhere for particle explosions and hover sound effects
+
+### 🎯 Quick Start
+1. Visit `theme-control-panel.php` for the master control center
+2. Try `test-themes.php` for comprehensive testing
+3. Explore `features-showcase.php` for a guided tour
+4. Use keyboard shortcuts (Ctrl+1-4 for themes, Ctrl+T for cycling)
+5. Enable voice control and say "switch to dark theme"
+
+### 🎮 Gaming Mode
+Activate gaming mode for the ultimate CS2 experience:
+- Switches to CS2 theme automatically
+- Enables fireworks particle effects
+- Increases audio volume to 80%
+- Shows audio visualizer
+- Optimizes performance for gaming
 
 ## 🚀 Installation
 

@@ -163,6 +163,10 @@ if (isset($_SESSION['user_id'])) {
                         ⌨️ Shortcuts
                     </button>
                     
+                    <a href="theme-control-panel.php" class="btn btn-gradient ms-2">
+                        🎛️ Control Panel
+                    </a>
+                    
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <a href="profile.php" class="btn btn-outline-light ms-2">👤 Profile</a>
                         <a href="logout.php" class="btn btn-outline-light ms-2">🚪 Logout</a>

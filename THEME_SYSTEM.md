@@ -1,6 +1,6 @@
-# 🎨 Unified Theme System
+# 🚀 Advanced Theme System v3.0
 
-A clean, modern theme system for the Affinity Forum with advanced features and accessibility support.
+A next-generation theme system for the Affinity Forum with AI-powered features, advanced effects, and smart optimization.
 
 ## ✨ Features
 
@@ -23,11 +23,14 @@ A clean, modern theme system for the Affinity Forum with advanced features and a
 - Keyboard shortcuts
 
 ### 🚀 Advanced Features
-- Particle effects system
-- Audio feedback
-- Performance monitoring
-- Settings export/import
-- Auto-save and recovery
+- **Interactive Particle System** - 6 different particle types with physics and mouse interaction
+- **Enhanced Audio System** - Multiple sound effects, volume control, and audio visualization
+- **AI-Powered Smart Suggestions** - Time-based theme recommendations and auto-optimization
+- **Real-Time Performance Monitoring** - FPS tracking, memory usage, and automatic optimization
+- **Advanced Accessibility** - Voice control, color blind support, and enhanced screen reader support
+- **Custom Theme Creation** - Live color picker with preview and sharing capabilities
+- **Smooth Animations** - Page transitions, element animations, and scroll effects
+- **Settings Management** - Export/import, auto-save, recovery, and cloud sync ready
 
 ## 🛠️ Usage
 
@@ -51,8 +54,31 @@ A clean, modern theme system for the Affinity Forum with advanced features and a
 <button onclick="toggleHighContrast()">High Contrast</button>
 <button onclick="toggleReducedMotion()">Reduced Motion</button>
 <button onclick="toggleFontSize()">Font Size</button>
-<button onclick="toggleParticles()">Particles</button>
-<button onclick="toggleAudio()">Audio</button>
+<button onclick="toggleColorBlindSupport()">Color Blind Support</button>
+<button onclick="enableVoiceControl()">Voice Control</button>
+```
+
+### Particle Effects
+```html
+<button onclick="switchParticleEffect('fireworks')">🎆 Fireworks</button>
+<button onclick="switchParticleEffect('snow')">❄️ Snow</button>
+<button onclick="switchParticleEffect('rain')">🌧️ Rain</button>
+<button onclick="switchParticleEffect('stars')">⭐ Stars</button>
+<button onclick="switchParticleEffect('bubbles')">🫧 Bubbles</button>
+```
+
+### Audio Controls
+```html
+<input type="range" min="0" max="1" step="0.1" onchange="setVolume(this.value)">
+<button onclick="toggleAudioVisualizer()">Audio Visualizer</button>
+<button onclick="window.themeManager.playSound('notification')">Test Sound</button>
+```
+
+### Advanced Features
+```html
+<button onclick="showPerformanceDashboard()">Performance Dashboard</button>
+<button onclick="createCustomTheme('MyTheme', colors)">Create Custom Theme</button>
+<button onclick="exportPerformanceReport()">Export Performance Report</button>
 ```
 
 ## ⌨️ Keyboard Shortcuts
