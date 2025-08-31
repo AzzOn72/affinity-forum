@@ -37,7 +37,7 @@ if (isset($_SESSION['user_id'])) {
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/themes-ultra-premium.css">
+    <link rel="stylesheet" href="css/themes.css">
     
     <!-- Meta tags -->
     <meta name="description" content="Affinity Forum - Connect, Share, and Grow Together">
@@ -107,7 +107,7 @@ if (isset($_SESSION['user_id'])) {
     </script>
     
     <!-- Test script directly in header -->
-    <script src="js/themes-ultra-premium-test.js"></script>
+    
 </head>
 <body data-theme="<?php echo isset($_COOKIE['selectedTheme']) ? $_COOKIE['selectedTheme'] : 'light'; ?>" data-device="<?php echo isset($_COOKIE['selectedDevice']) ? $_COOKIE['selectedDevice'] : 'desktop'; ?>">
     <!-- Navigation Bar -->
