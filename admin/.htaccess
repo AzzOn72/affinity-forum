@@ -1,0 +1,18 @@
+# Simple admin .htaccess - no PHP directives that cause 500 errors
+# Just basic security and file protection
+
+# Prevent access to sensitive files
+<Files "*.sql">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.log">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Allow PHP files to execute normally
+<Files "*.php">
+    Require all granted
+</Files>
