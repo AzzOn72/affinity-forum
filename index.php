@@ -24,11 +24,31 @@ try {
     // Check if tables exist before querying
     $stmt = $pdo->query("SHOW TABLES LIKE 'users'");
     if ($stmt->rowCount() > 0) {
-        $stats = getForumStats();
+        $stmt = $pdo->query("SELECT COUNT(*) FROM users");
+        $stats['total_users'] = $stmt->fetchColumn();
     }
 } catch (Exception $e) {
-    error_log("Failed to get forum stats: " . $e->getMessage());
-    // Use default stats
+    error_log("Failed to get user count: " . $e->getMessage());
+}
+
+try {
+    $stmt = $pdo->query("SHOW TABLES LIKE 'threads'");
+    if ($stmt->rowCount() > 0) {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM threads");
+        $stats['total_threads'] = $stmt->fetchColumn();
+    }
+} catch (Exception $e) {
+    error_log("Failed to get thread count: " . $e->getMessage());
+}
+
+try {
+    $stmt = $pdo->query("SHOW TABLES LIKE 'posts'");
+    if ($stmt->rowCount() > 0) {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM posts");
+        $stats['total_posts'] = $stmt->fetchColumn();
+    }
+} catch (Exception $e) {
+    error_log("Failed to get post count: " . $e->getMessage());
 }
 
 // Try to get recent threads safely
@@ -81,7 +101,8 @@ try {
 try {
     $stmt = $pdo->query("SHOW TABLES LIKE 'categories'");
     if ($stmt->rowCount() > 0) {
-        $categories = getCategories();
+        $stmt = $pdo->query("SELECT * FROM categories ORDER BY sort_order, name");
+        $categories = $stmt->fetchAll();
     }
 } catch (Exception $e) {
     error_log("Failed to get categories: " . $e->getMessage());
