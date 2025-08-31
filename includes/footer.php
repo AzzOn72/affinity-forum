@@ -137,7 +137,9 @@
 
 <!-- Custom JavaScript -->
 <script src="js/main.js"></script>
-<script src="js/themes-ultra-premium.js"></script>
+<script src="js/theme-config.js"></script>
+<script src="js/themes.js"></script>
+<script src="js/performance-optimizer.js"></script>
 
 <!-- Initialize Theme Manager -->
 <script>
