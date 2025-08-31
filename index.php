@@ -1,8 +1,8 @@
 <?php
-require_once 'config.php';
+require_once 'config-local.php';
 
 // Initialize database connection
-$pdo = getDBConnection();
+$pdo = getLocalDBConnection();
 
 // Initialize variables with safe defaults
 $stats = [
@@ -22,9 +22,9 @@ $categories = [];
 // Try to get forum statistics safely
 try {
     // Check if tables exist before querying
-    $stmt = $pdo->query("SHOW TABLES LIKE 'users'");
-    if ($stmt->rowCount() > 0) {
-        $stats = getForumStats();
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
+    if ($stmt->fetch()['count'] > 0) {
+        $stats = getLocalForumStats();
     }
 } catch (Exception $e) {
     error_log("Failed to get forum stats: " . $e->getMessage());
@@ -33,12 +33,12 @@ try {
 
 // Try to get recent threads safely
 try {
-    $stmt = $pdo->query("SHOW TABLES LIKE 'threads'");
-    if ($stmt->rowCount() > 0) {
-        $stmt = $pdo->query("SELECT t.*, u.username, c.name as category_name 
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM threads");
+    if ($stmt->fetch()['count'] > 0) {
+        $stmt = $pdo->query("SELECT t.*, u.username, s.name as subforum_name 
                              FROM threads t 
                              JOIN users u ON t.user_id = u.id 
-                             JOIN categories c ON t.category_id = c.id 
+                             JOIN subforums s ON t.subforum_id = s.id 
                              ORDER BY t.created_at DESC 
                              LIMIT 5");
         $recent_threads = $stmt->fetchAll();
@@ -49,13 +49,13 @@ try {
 
 // Try to get popular threads safely
 try {
-    $stmt = $pdo->query("SHOW TABLES LIKE 'threads'");
-    if ($stmt->rowCount() > 0) {
-        $stmt = $pdo->query("SELECT t.*, u.username, c.name as category_name 
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM threads");
+    if ($stmt->fetch()['count'] > 0) {
+        $stmt = $pdo->query("SELECT t.*, u.username, s.name as subforum_name 
                              FROM threads t 
                              JOIN users u ON t.user_id = u.id 
-                             JOIN categories c ON t.category_id = c.id 
-                             ORDER BY t.views DESC, t.replies DESC 
+                             JOIN subforums s ON t.subforum_id = s.id 
+                             ORDER BY t.views DESC, t.likes DESC 
                              LIMIT 5");
         $popular_threads = $stmt->fetchAll();
     }
@@ -65,11 +65,11 @@ try {
 
 // Try to get online users safely
 try {
-    $stmt = $pdo->query("SHOW TABLES LIKE 'users'");
-    if ($stmt->rowCount() > 0) {
-        $stmt = $pdo->query("SELECT username, last_activity FROM users 
-                             WHERE last_activity > DATE_SUB(NOW(), INTERVAL 15 MINUTE) 
-                             ORDER BY last_activity DESC 
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
+    if ($stmt->fetch()['count'] > 0) {
+        $stmt = $pdo->query("SELECT username, last_seen FROM users 
+                             WHERE last_seen > datetime('now', '-15 minutes') 
+                             ORDER BY last_seen DESC 
                              LIMIT 10");
         $online_users = $stmt->fetchAll();
     }
@@ -79,9 +79,10 @@ try {
 
 // Try to get categories safely
 try {
-    $stmt = $pdo->query("SHOW TABLES LIKE 'categories'");
-    if ($stmt->rowCount() > 0) {
-        $categories = getCategories();
+    // Use a direct query to check if categories table has data
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM categories");
+    if ($stmt->fetch()['count'] > 0) {
+        $categories = getLocalCategories();
     }
 } catch (Exception $e) {
     error_log("Failed to get categories: " . $e->getMessage());
@@ -212,7 +213,7 @@ include 'includes/header.php';
                                 <div class="category-card">
                                     <div class="category-header">
                                         <div class="category-icon">
-                                            <i class="<?php echo getCategoryIcon($category['name']); ?>"></i>
+                                            <i class="<?php echo getLocalCategoryIcon($category['name']); ?>"></i>
                                         </div>
                                         <div class="category-info">
                                             <h3 class="category-title">
@@ -317,8 +318,8 @@ include 'includes/header.php';
                                                 </a>
                                             </span>
                                             <span class="timeline-category">
-                                                in <a href="category.php?id=<?php echo $thread['category_id']; ?>">
-                                                    <?php echo htmlspecialchars($thread['category_name']); ?>
+                                                in <a href="subforum.php?id=<?php echo $thread['subforum_id']; ?>">
+                                                    <?php echo htmlspecialchars($thread['subforum_name']); ?>
                                                 </a>
                                             </span>
                                         </div>
